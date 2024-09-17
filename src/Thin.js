@@ -4,7 +4,8 @@ export default class Thin extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      printText: '' // State to hold the text input
+      printText: '',  // State to hold the text input
+      responseText: '' // State to hold the response data from the backend
     };
   }
 
@@ -15,7 +16,7 @@ export default class Thin extends Component {
   handlePrint = () => {
     const { printText } = this.state;
     
-    fetch('http://localhost:8080/api/print', {
+    fetch('http://192.168.2.12:8081/api/print', {
       method: 'POST', // Use POST if the API expects that
       headers: {
         'Content-Type': 'application/json' // Adjusted to match API expectations
@@ -29,15 +30,15 @@ export default class Thin extends Component {
         throw new Error('Network response was not ok.');
       })
       .then(data => {
-        console.log('Print request successful:', data); // Logging text response
+        this.setState({ responseText: data }); // Update state with response data
       })
       .catch(error => {
-        console.error('Error with the print request:', error);
+        console.error(error);
       });
   };
 
   handleCashDrawer = () => {
-    fetch('http://localhost:8080/api/cash-drawer', {
+    fetch('http://192.168.2.12:8081/api/cash-drawer', {
       method: 'GET', // Assuming GET is correct for this request
       headers: {
         'Content-Type': 'text/plain' // Adjusting for text format
@@ -50,16 +51,29 @@ export default class Thin extends Component {
         throw new Error('Network response was not ok.');
       })
       .then(data => {
-        console.log('Cash drawer request successful:', data); // Logging text response
+        this.setState({ responseText: data }); // Update state with response data
       })
       .catch(error => {
-        console.error('Error with the cash drawer request:', error);
+        console.error(error);
       });
   };
 
   render() {
+    const containerStyle = {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      height: '100vh',
+      textAlign: 'center'
+    };
+
+    const buttonStyle = {
+      margin: '5px'
+    };
+
     return (
-      <div>
+      <div style={containerStyle}>
         <textarea
           value={this.state.printText}
           onChange={this.handleTextChange}
@@ -67,9 +81,11 @@ export default class Thin extends Component {
           cols="50"
           placeholder="Enter text to print..."
         />
-        <br />
-        <button onClick={this.handlePrint}>Print</button>
-        <button onClick={this.handleCashDrawer}>Cash Drawer</button>
+        <div>
+          <button onClick={this.handlePrint} style={buttonStyle}>Print</button>
+          <button onClick={this.handleCashDrawer} style={buttonStyle}>Cash Drawer</button>
+        </div>
+        {this.state.responseText && <h1>{this.state.responseText}</h1>} {/* Display response data */}
       </div>
     );
   }
